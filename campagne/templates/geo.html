@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="geo-container">
+    <div class="geo-header">
+        <h1><i class="fas fa-map"></i> Répartition Géographique des Donneurs</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div id="map" class="map-container"></div>
+        </div>
+        <div class="col-md-6">
+            <canvas id="donorsChart" class="chart-container"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var map = L.map('map').setView([3.8480, 11.5021], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Icône personnalisée (bonhomme)
+    var donorIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1077/1077063.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+
+    var donors = {{ donors_json|safe }};
+    console.log("Données marqueurs :", donors);
+
+    var markers = [];
+
+    if (!donors || donors.length === 0) {
+        console.log("Aucune donnée pour les marqueurs.");
+    } else {
+        donors.forEach(function(donor) {
+            console.log("Ajout marqueur :", donor.arrondissement, donor.quartier, donor.latitude, donor.longitude, donor.count);
+            var markerColor = donor.count > 5 ? 'red' : donor.count > 2 ? 'orange' : 'green';
+            var marker = L.marker([donor.latitude, donor.longitude], {
+                icon: donorIcon,
+                className: 'donor-marker ' + markerColor
+            }).addTo(map);
+
+            marker.bindPopup(
+                "<b>Arrondissement:</b> " + donor.arrondissement + "<br>" +
+                "<b>Quartier:</b> " + donor.quartier + "<br>" +
+                "<b>Nombre de donneurs:</b> " + donor.count
+            );
+
+            markers.push(marker);
+        });
+
+        map.on('click', function(e) {
+            var clickedLatLng = e.latlng;
+            var closestMarker = null;
+            var minDistance = Infinity;
+
+            markers.forEach(function(marker) {
+                var markerLatLng = marker.getLatLng();
+                var distance = clickedLatLng.distanceTo(markerLatLng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestMarker = marker;
+                }
+            });
+
+            if (closestMarker) {
+                map.setView(closestMarker.getLatLng(), 12);
+                closestMarker.openPopup();
+            }
+        });
+    }
+
+    // Légende
+    var legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        var div = L.DomUtil.create('div', 'legend');
+        div.innerHTML += '<strong>Légende</strong><br>';
+        div.innerHTML += '<i style="background:var(--primary-color)"></i> Forte participation (> 5 donneurs)<br>';
+        div.innerHTML += '<i style="background:orange"></i> Moyenne (3-5 donneurs)<br>';
+        div.innerHTML += '<i style="background:green"></i> Faible (≤ 2 donneurs)';
+        return div;
+    };
+    legend.addTo(map);
+
+    // Graphe
+    var graphData = {{ graph_json|safe }};
+    console.log("Données graphe :", graphData);
+
+    if (!graphData || !graphData.labels || !graphData.counts) {
+        console.log("Données graphe invalides.");
+    } else {
+        var ctx = document.getElementById('donorsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: graphData.labels,
+                datasets: [{
+                    label: 'Nombre de donneurs par arrondissement',
+                    data: graphData.counts,
+                    backgroundColor: 'rgba(178, 34, 34, 0.6)', /* Rouge sang transparent */
+                    borderColor: 'rgba(178, 34, 34, 1)', /* Rouge sang plein */
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#333' }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<style>
+    /* Variables harmonisées avec base.html et dashboard.html */
+    :root {
+        --primary-color: #b22222;   /* Rouge sang */
+        --secondary-color: #8b1a1a; /* Rouge plus foncé */
+        --background-color: #f5f5f5;
+        --card-bg: #fff;
+        --text-muted: #6c757d;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --sidebar-text: #555;
+    }
+
+    /* Conteneur principal */
+    .geo-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* En-tête */
+    .geo-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: var(--primary-color);
+        animation: fade-in 0.8s ease-out;
+    }
+
+    .geo-header h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .geo-header i {
+        font-size: 2.5rem;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Carte */
+    .map-container {
+        height: 500px;
+        border: 2px solid var(--primary-color);
+        border-radius: 15px;
+        box-shadow: 0 5px 15px var(--shadow-color);
+        animation: slide-up 0.5s ease-out;
+    }
+
+    /* Graphe */
+    .chart-container {
+        max-height: 500px;
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px var(--shadow-color);
+        animation: slide-up 0.5s ease-out 0.1s forwards;
+    }
+
+    @keyframes slide-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Style pour les marqueurs */
+    .donor-marker.red {
+        filter: drop-shadow(0 0 5px var(--primary-color));
+    }
+    .donor-marker.orange {
+        filter: drop-shadow(0 0 5px orange);
+    }
+    .donor-marker.green {
+        filter: drop-shadow(0 0 5px green);
+    }
+
+    /* Style pour la légende */
+    .legend {
+        background: var(--card-bg);
+        padding: 10px;
+        border: 2px solid var(--primary-color);
+        border-radius: 10px;
+        box-shadow: 0 2px 5px var(--shadow-color);
+        font-family: 'Arial', sans-serif;
+        color: var(--sidebar-text);
+    }
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.8;
+        border-radius: 3px;
+    }
+    .legend strong {
+        color: var(--primary-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .geo-container {
+            padding: 30px 15px;
+        }
+        .geo-header h1 {
+            font-size: 2rem;
+        }
+        .geo-header i {
+            font-size: 2rem;
+        }
+        .map-container, .chart-container {
+            height: 400px;
+            margin-bottom: 20px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .geo-container {
+            padding: 20px 10px;
+        }
+        .geo-header h1 {
+            font-size: 1.8rem;
+        }
+        .geo-header i {
+            font-size: 1.8rem;
+        }
+        .map-container, .chart-container {
+            height: 300px;
+        }
+        .row {
+            flex-direction: column; /* Empile carte et graphe verticalement */
+        }
+        .col-md-6 {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

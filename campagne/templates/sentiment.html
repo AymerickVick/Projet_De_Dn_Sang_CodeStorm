@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="sentiment-container">
+    <h1 class="section-title"><i class="fas fa-chart-line"></i> Analyse de Sentiment</h1>
+
+    {% if feedback_list %}
+        <div class="card sentiment-card">
+            <h3 class="card-title"><i class="fas fa-smile"></i> Résumé des Sentiments</h3>
+            <p><i class="fas fa-thumbs-up"></i> Positif : <span class="highlight positif">{{ sentiment_counts.positif }}</span></p>
+            <p><i class="fas fa-thumbs-down"></i> Négatif : <span class="highlight negatif">{{ sentiment_counts.negatif }}</span></p>
+            <p><i class="fas fa-meh"></i> Neutre : <span class="highlight neutre">{{ sentiment_counts.neutre }}</span></p>
+        </div>
+
+        <div class="card sentiment-card chart-card">
+            <h3 class="card-title"><i class="fas fa-chart-pie"></i> Distribution Globale des Sentiments</h3>
+            <canvas id="sentimentChart" style="max-height: 400px;"></canvas>
+        </div>
+
+        <div class="card sentiment-card chart-card">
+            <h3 class="card-title"><i class="fas fa-clock"></i> Tendances Temporelles</h3>
+            <canvas id="timeChart" style="max-height: 400px;"></canvas>
+        </div>
+
+        <div class="card sentiment-card chart-card">
+            <h3 class="card-title"><i class="fas fa-venus-mars"></i> Sentiment par Genre</h3>
+            <canvas id="genderChart" style="max-height: 400px;"></canvas>
+        </div>
+
+        <div class="card sentiment-card chart-card">
+            <h3 class="card-title"><i class="fas fa-users"></i> Sentiment par Âge</h3>
+            <canvas id="ageChart" style="max-height: 400px;"></canvas>
+        </div>
+
+        <div class="card sentiment-card">
+            <h3 class="card-title"><i class="fas fa-comments"></i> Liste des Feedbacks</h3>
+            <ul class="feedback-list">
+                {% for feedback in feedback_list %}
+                    <li class="feedback-item {{ feedback.sentiment }}">{{ feedback.text }} <span>({{ feedback.sentiment }})</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p class="text-muted"><i class="fas fa-exclamation-triangle"></i> Aucun feedback disponible pour le moment.</p>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+    var chartData = {{ chart_data|safe }};
+
+    // Graphique : Distribution globale
+    var ctxSentiment = document.getElementById('sentimentChart').getContext('2d');
+    new Chart(ctxSentiment, {
+        type: 'pie',
+        data: {
+            labels: chartData.sentiment_dist.labels,
+            datasets: [{
+                data: chartData.sentiment_dist.counts,
+                backgroundColor: ['#28a745', '#dc3545', '#6c757d'], // Vert, Rouge, Gris
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 14 } } },
+                title: { display: true, text: 'Distribution des Sentiments', font: { size: 18 } }
+            }
+        }
+    });
+
+    // Graphique : Tendances temporelles
+    var ctxTime = document.getElementById('timeChart').getContext('2d');
+    new Chart(ctxTime, {
+        type: 'line',
+        data: {
+            labels: chartData.time_dist.labels,
+            datasets: [{
+                label: 'Nombre de Feedbacks',
+                data: chartData.time_dist.counts,
+                borderColor: '#b22222',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Nombre' } } },
+            plugins: { title: { display: true, text: 'Tendances Temporelles', font: { size: 18 } } }
+        }
+    });
+
+    // Graphique : Sentiment par genre
+    var ctxGender = document.getElementById('genderChart').getContext('2d');
+    new Chart(ctxGender, {
+        type: 'bar',
+        data: {
+            labels: chartData.gender_dist.labels,
+            datasets: [
+                { label: 'Positif', data: chartData.gender_dist.positif, backgroundColor: '#28a745' },
+                { label: 'Négatif', data: chartData.gender_dist.negatif, backgroundColor: '#dc3545' },
+                { label: 'Neutre', data: chartData.gender_dist.neutre, backgroundColor: '#6c757d' }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Nombre' } } },
+            plugins: { title: { display: true, text: 'Sentiment par Genre', font: { size: 18 } } }
+        }
+    });
+
+    // Graphique : Sentiment par âge
+    var ctxAge = document.getElementById('ageChart').getContext('2d');
+    new Chart(ctxAge, {
+        type: 'bar',
+        data: {
+            labels: chartData.age_dist.labels,
+            datasets: [
+                { label: 'Positif', data: chartData.age_dist.positif, backgroundColor: '#28a745' },
+                { label: 'Négatif', data: chartData.age_dist.negatif, backgroundColor: '#dc3545' },
+                { label: 'Neutre', data: chartData.age_dist.neutre, backgroundColor: '#6c757d' }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Nombre' } } },
+            plugins: { title: { display: true, text: 'Sentiment par Âge', font: { size: 18 } } }
+        }
+    });
+</script>
+
+<style>
+    .sentiment-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        color: #b22222;
+        font-size: 2em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .sentiment-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card-title {
+        color: #b22222;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .highlight.positif { color: #28a745; font-weight: bold; }
+    .highlight.negatif { color: #dc3545; font-weight: bold; }
+    .highlight.neutre { color: #6c757d; font-weight: bold; }
+
+    .feedback-list {
+        list-style: none;
+        padding: 0;
+        font-size: 1em;
+    }
+
+    .feedback-item {
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 3px;
+    }
+
+    .feedback-item.positif { background-color: #e6ffe6; }
+    .feedback-item.negatif { background-color: #ffe6e6; }
+    .feedback-item.neutre { background-color: #f5f5f5; }
+
+    .feedback-item span {
+        font-size: 0.9em;
+        font-style: italic;
+        margin-left: 10px;
+    }
+
+    .chart-card {
+        padding: 20px;
+    }
+
+    .text-muted {
+        color: #666;
+        font-style: italic;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .sentiment-container {
+            padding: 10px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+        }
+
+        .feedback-list, .sentiment-card p {
+            font-size: 0.9em;
+        }
+    }
+</style>
+{% endblock %}

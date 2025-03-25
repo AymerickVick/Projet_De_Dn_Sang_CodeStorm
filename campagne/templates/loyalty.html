@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="loyalty-container">
+    <h1 class="section-title"><i class="fas fa-heart"></i> Fidélisation des Donneurs</h1>
+
+    <div class="card loyalty-card">
+        <h3 class="card-title"><i class="fas fa-chart-bar"></i> Statistiques de Fidélité</h3>
+        <p><i class="fas fa-users"></i> Donneurs fidèles (2+ dons) : <span class="highlight">{{ loyal_donors }}</span></p>
+        <p><i class="fas fa-user-friends"></i> Total des donneurs : <span class="highlight">{{ total_donors }}</span></p>
+        <p><i class="fas fa-percentage"></i> Pourcentage de fidélité : <span class="highlight">{{ percentage|floatformat:1 }}%</span></p>
+        <p><i class="fas fa-hand-holding-heart"></i> Nombre moyen de dons par donneur : <span class="highlight">{{ avg_donations|floatformat:1 }}</span></p>
+    </div>
+
+    <div class="card loyalty-card chart-card">
+        <h3 class="card-title"><i class="fas fa-chart-line"></i> Distribution par Nombre de Dons</h3>
+        <canvas id="donationChart" style="max-height: 400px;"></canvas>
+    </div>
+
+    <div class="card loyalty-card">
+        <h3 class="card-title"><i class="fas fa-user-tag"></i> Profil des Donneurs Fidèles</h3>
+        <h4><i class="fas fa-birthday-cake"></i> Par Âge</h4>
+        <ul class="info-list">
+            <li>0-18 ans : <span class="highlight">{{ age_groups.0_18 }}</span></li>
+            <li>19-30 ans : <span class="highlight">{{ age_groups.19_30 }}</span></li>
+            <li>31-50 ans : <span class="highlight">{{ age_groups.31_50 }}</span></li>
+            <li>51+ ans : <span class="highlight">{{ age_groups.51_plus }}</span></li>
+        </ul>
+        <h4><i class="fas fa-venus-mars"></i> Par Genre</h4>
+        <ul class="info-list">
+            {% for g in gender_dist %}
+                <li>{{ g.genre }} : <span class="highlight">{{ g.count }}</span></li>
+            {% endfor %}
+        </ul>
+        <h4><i class="fas fa-briefcase"></i> Top Professions</h4>
+        <ul class="info-list">
+            {% for p in profession_dist %}
+                <li>{{ p.profession|default:"Non spécifié" }} : <span class="highlight">{{ p.count }}</span></li>
+            {% endfor %}
+        </ul>
+        <h4><i class="fas fa-map-marker-alt"></i> Top Quartiers</h4>
+        <ul class="info-list">
+            {% for r in region_dist %}
+                <li>{{ r.quartier }} : <span class="highlight">{{ r.count }}</span></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="card loyalty-card chart-card">
+        <h3 class="card-title"><i class="fas fa-chart-bar"></i> Distribution par Âge des Fidèles</h3>
+        <canvas id="ageChart" style="max-height: 400px;"></canvas>
+    </div>
+
+    <div class="card loyalty-card chart-card">
+        <h3 class="card-title"><i class="fas fa-chart-pie"></i> Distribution par Genre des Fidèles</h3>
+        <canvas id="genderChart" style="max-height: 400px;"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var chartData = {{ chart_data|safe }};
+
+    // Graphique : Distribution par nombre de dons
+    var ctxDonation = document.getElementById('donationChart').getContext('2d');
+    new Chart(ctxDonation, {
+        type: 'bar',
+        data: {
+            labels: chartData.donation_dist.labels,
+            datasets: [{
+                label: 'Nombre de Donneurs',
+                data: chartData.donation_dist.counts,
+                backgroundColor: 'rgba(178, 34, 34, 0.6)',
+                borderColor: 'rgba(178, 34, 34, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Nombre' } } },
+            plugins: { title: { display: true, text: 'Distribution par Nombre de Dons', font: { size: 18 } } }
+        }
+    });
+
+    // Graphique : Distribution par âge
+    var ctxAge = document.getElementById('ageChart').getContext('2d');
+    new Chart(ctxAge, {
+        type: 'bar',
+        data: {
+            labels: chartData.age_dist.labels,
+            datasets: [{
+                label: 'Donneurs Fidèles',
+                data: chartData.age_dist.counts,
+                backgroundColor: 'rgba(34, 139, 34, 0.6)', // Vert pour fidélité
+                borderColor: 'rgba(34, 139, 34, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Nombre' } } },
+            plugins: { title: { display: true, text: 'Distribution par Âge', font: { size: 18 } } }
+        }
+    });
+
+    // Graphique : Distribution par genre
+    var ctxGender = document.getElementById('genderChart').getContext('2d');
+    new Chart(ctxGender, {
+        type: 'pie',
+        data: {
+            labels: chartData.gender_dist.labels,
+            datasets: [{
+                data: chartData.gender_dist.counts,
+                backgroundColor: ['#b22222', '#4682b4'], // Rouge et bleu
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 14 } } },
+                title: { display: true, text: 'Distribution par Genre', font: { size: 18 } }
+            }
+        }
+    });
+</script>
+
+<style>
+    .loyalty-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        color: #b22222;
+        font-size: 2em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .loyalty-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .card-title {
+        color: #b22222;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .loyalty-card h4 {
+        color: #555;
+        font-size: 1.2em;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        font-size: 1em;
+    }
+
+    .info-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .highlight {
+        color: #b22222;
+        font-weight: bold;
+    }
+
+    .chart-card {
+        padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .loyalty-container {
+            padding: 10px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+        }
+
+        .info-list, .loyalty-card p {
+            font-size: 0.9em;
+        }
+    }
+</style>
+{% endblock %}

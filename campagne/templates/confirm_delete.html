@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="delete-donor-container">
+    <div class="page-header">
+        <h1 class="section-title">
+            <i class="fas fa-trash-alt"></i> Confirmer la Suppression
+        </h1>
+    </div>
+
+    <div class="delete-donor-card">
+        <div class="card-content">
+            <p class="warning-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                Voulez-vous vraiment supprimer le donneur #{{ donor.id }} ?
+            </p>
+            <ul class="info-list">
+                <li>
+                    <span class="label"><i class="fas fa-briefcase"></i> Profession :</span>
+                    <span class="highlight">{{ donor.profession|default:"Inconnu" }}</span>
+                </li>
+                <li>
+                    <span class="label"><i class="fas fa-map-marker-alt"></i> Quartier :</span>
+                    <span class="highlight">{{ donor.quartier|default:"Inconnu" }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <form method="post" class="delete-donor-form">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Oui, Supprimer
+                </button>
+                <a href="{% url 'donors' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #B22222;
+        --secondary-color: #8B0000;
+        --background-light: #F8F9FA;
+        --text-dark: #333333;
+        --text-muted: #6C757D;
+        --border-light: #E9ECEF;
+        --warning-color: #DC3545;
+    }
+
+    .delete-donor-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--background-light);
+        font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    }
+
+    .delete-donor-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+        border: 1px solid var(--border-light);
+    }
+
+    .card-content {
+        margin-bottom: 2rem;
+    }
+
+    .warning-message {
+        color: var(--warning-color);
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-dark);
+        transition: background-color 0.2s ease;
+    }
+
+    .info-list li:last-child {
+        border-bottom: none;
+    }
+
+    .info-list li:hover {
+        background-color: rgba(178, 34, 34, 0.05);
+    }
+
+    .info-list .label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-list .label i {
+        color: var(--primary-color);
+    }
+
+    .highlight {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+    .delete-donor-form {
+        text-align: center;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: white;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-danger {
+        background-color: var(--warning-color);
+        border: 1px solid var(--warning-color);
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background-color: #6C757D;
+        border: 1px solid #6C757D;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5A6268;
+        border-color: #5A6268;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .delete-donor-container {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .delete-donor-card {
+            padding: 1.5rem;
+        }
+
+        .warning-message {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .delete-donor-container {
+            padding: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.7rem;
+        }
+
+        .delete-donor-card {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don de Sang - Connexion</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Variables CSS */
+        :root {
+            --primary-color: #d9534f;   /* Rouge sang principal */
+            --secondary-color: #c9302c; /* Rouge sang plus foncé */
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --heart-opacity: 0.3;       /* Opacité des cœurs flottants */
+            --input-bg: #f8eaea;       /* Fond foncé pour les inputs */
+            --input-text: #333;        /* Texte foncé pour les inputs */
+        }
+
+        /* Styles généraux */
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animation des cœurs flottants */
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart {
+            position: absolute;
+            color: rgba(217, 83, 79, var(--heart-opacity));
+            font-size: 20px;
+            animation: float-hearts linear infinite;
+        }
+
+        @keyframes float-hearts {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: var(--heart-opacity);
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0.1;
+            }
+        }
+
+        /* Conteneur de connexion */
+        .login-container {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            animation: fade-in 0.6s ease-out;
+            border: 1px solid rgba(217, 83, 79, 0.1);
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* En-tête de connexion */
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .login-header i {
+            font-size: 60px;
+            margin-bottom: 15px;
+            animation: heartbeat 2s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Groupes d’entrée */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border-color: var(--primary-color);
+            padding-left: 40px;
+            transition: all 0.3s ease;
+            animation: slide-up 0.5s ease-out forwards;
+        }
+
+        /* Animation pour les inputs au chargement */
+        @keyframes slide-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .input-group:nth-child(2) .form-control {
+            animation-delay: 0.1s; /* Légère décalage pour le mot de passe */
+        }
+
+        .input-group-text {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background-color: #fff;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(217, 83, 79, 0.25);
+            transform: scale(1.02); /* Légère expansion au focus */
+        }
+
+        .form-control:focus + .input-group-text,
+        .form-control:not(:placeholder-shown) + .input-group-text {
+            color: var(--secondary-color);
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        /* Bouton de connexion */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: btn-pop 0.5s ease-out 0.2s forwards;
+        }
+
+        @keyframes btn-pop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px); /* Léger soulèvement au survol */
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .btn-primary:hover::before {
+            left: -150%;
+            opacity: 1;
+        }
+
+        /* Animation d’erreur */
+        @keyframes wiggle {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake-error {
+            animation: wiggle 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fond de cœurs flottants -->
+    <div class="floating-hearts" id="floatingHearts"></div>
+
+    <!-- Conteneur de connexion -->
+    <div class="login-container">
+        <div class="login-header">
+            <i class="bi bi-heart-pulse text-danger"></i>
+            <h2>Don de Sang</h2>
+            <p class="text-muted">Connectez-vous à votre compte</p>
+        </div>
+        <form id="loginForm" method="post">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="username" id="username" class="form-control" 
+                       placeholder="Nom d'utilisateur" required>
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" id="password" class="form-control" 
+                       placeholder="Mot de passe" required>
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Se connecter
+            </button>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Générer les cœurs flottants
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const heartsCount = 30;
+
+            for (let i = 0; i < heartsCount; i++) {
+                const heart = document.createElement('i');
+                heart.classList.add('heart', 'bi', 'bi-heart-fill');
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.fontSize = `${Math.random() * 20 + 20}px`; // Tailles entre 20px et 40px
+                heart.style.animationDuration = `${Math.random() * 15 + 10}s`; // Durée entre 10s et 25s
+                heart.style.animationDelay = `${Math.random() * 5}s`; // Délai entre 0s et 5s
+                container.appendChild(heart);
+            }
+        }
+
+        // Validation du formulaire et animation d’erreur
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+
+            if (!username.value.trim() || !password.value.trim()) {
+                e.preventDefault();
+                if (!username.value.trim()) {
+                    username.classList.add('shake-error');
+                    setTimeout(() => username.classList.remove('shake-error'), 300);
+                }
+                if (!password.value.trim()) {
+                    password.classList.add('shake-error');
+                    setTimeout(() => password.classList.remove('shake-error'), 300);
+                }
+            }
+        });
+
+        // Initialisation des cœurs flottants au chargement
+        window.addEventListener('load', createFloatingHearts);
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="profiling-container">
+    <div class="page-header">
+        <h1 class="section-title">
+            <i class="fas fa-user-friends"></i> Profilage des Donneurs
+        </h1>
+    </div>
+
+    <div class="profiling-grid">
+        <div class="profiling-column">
+            <div class="profiling-card gender-distribution">
+                <div class="card-header">
+                    <i class="fas fa-venus-mars"></i>
+                    <h3 class="card-title">Distribution par genre</h3>
+                </div>
+                <div class="card-content">
+                    <ul class="info-list">
+                        {% for g in gender_dist %}
+                            <li>
+                                <span class="label">
+                                    {% if g.genre == 'Homme' %}
+                                        <i class="fas fa-male"></i>
+                                    {% else %}
+                                        <i class="fas fa-female"></i>
+                                    {% endif %}
+                                    {{ g.genre }}
+                                </span>
+                                <span class="highlight">{{ g.count }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="profiling-card age-distribution">
+                <div class="card-header">
+                    <i class="fas fa-birthday-cake"></i>
+                    <h3 class="card-title">Distribution par âge</h3>
+                </div>
+                <div class="card-content">
+                    <ul class="info-list">
+                        <li>
+                            <span class="label"><i class="fas fa-child"></i> 0-18 ans</span>
+                            <span class="highlight">{{ age_groups.0_18 }}</span>
+                        </li>
+                        <li>
+                            <span class="label"><i class="fas fa-user"></i> 19-30 ans</span>
+                            <span class="highlight">{{ age_groups.19_30 }}</span>
+                        </li>
+                        <li>
+                            <span class="label"><i class="fas fa-user-friends"></i> 31-50 ans</span>
+                            <span class="highlight">{{ age_groups.31_50 }}</span>
+                        </li>
+                        <li>
+                            <span class="label"><i class="fas fa-user-tie"></i> 51+ ans</span>
+                            <span class="highlight">{{ age_groups.51_plus }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="profiling-column">
+            <div class="profiling-card donor-clusters">
+                <div class="card-header">
+                    <i class="fas fa-users"></i>
+                    <h3 class="card-title">Clusters de Donneurs</h3>
+                </div>
+                <div class="card-content">
+                    {% if cluster_insights %}
+                        <ul class="cluster-list">
+                            {% for cluster_id, insights in cluster_insights.items %}
+                                <li class="cluster-item">
+                                    <div class="cluster-header">
+                                        <span class="cluster-badge">Cluster {{ cluster_id }}</span>
+                                        <span class="cluster-count">({{ insights.count }} donneurs)</span>
+                                    </div>
+                                    <ul class="cluster-details">
+                                        <li>
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Âge moyen :
+                                            <span class="highlight">{{ insights.avg_age|floatformat:1 }}</span> ans
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-male"></i>
+                                            % Hommes :
+                                            <span class="highlight">{{ insights.male_pct|floatformat:1 }}</span>%
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check-circle"></i>
+                                            % Éligibles :
+                                            <span class="highlight">{{ insights.eligible_pct|floatformat:1 }}</span>%
+                                        </li>
+                                    </ul>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Aucun donneur pour le clustering.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profiling-card ideal-donor-profile">
+                <div class="card-header">
+                    <i class="fas fa-star"></i>
+                    <h3 class="card-title">Donneur Idéal</h3>
+                </div>
+                <div class="card-content">
+                    {% if cluster_insights %}
+                        {% for cluster_id, insights in cluster_insights.items %}
+                            {% if insights.eligible_pct > 50 %}
+                                <div class="ideal-donor-card">
+                                    <div class="ideal-donor-icon">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div class="ideal-donor-details">
+                                        <p>
+                                            Le Cluster {{ cluster_id }} est un profil idéal :
+                                            <span class="highlight">{{ insights.eligible_pct|floatformat:1 }}%</span> éligibles,
+                                            âge moyen <span class="highlight">{{ insights.avg_age|floatformat:1 }}</span> ans,
+                                            <span class="highlight">{{ insights.male_pct|floatformat:1 }}%</span> hommes.
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Aucune donnée pour identifier un donneur idéal.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="profiling-column full-width">
+            <div class="profiling-card chart-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3 class="card-title">Visualisation des Clusters</h3>
+                </div>
+                <div class="card-content">
+                    <canvas id="clusterChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var clusterData = {{ cluster_data|safe }};
+    var ctx = document.getElementById('clusterChart').getContext('2d');
+    var clusterChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: clusterData.labels,
+            datasets: [
+                {
+                    label: 'Nombre de Donneurs',
+                    data: clusterData.counts,
+                    backgroundColor: 'rgba(178, 34, 34, 0.6)',
+                    borderColor: 'rgba(178, 34, 34, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Âge Moyen',
+                    data: clusterData.avg_ages,
+                    type: 'line',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false,
+                    yAxisID: 'y2'
+                },
+                {
+                    label: '% Éligibles',
+                    data: clusterData.eligible_pcts,
+                    type: 'line',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false,
+                    yAxisID: 'y2'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Nombre' } },
+                y2: {
+                    position: 'right',
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: 'Âge / % Éligibles' }
+                }
+            },
+            plugins: {
+                title: { display: true, text: 'Profilage des Clusters' }
+            }
+        }
+    });
+</script>
+
+<style>
+    :root {
+        --primary-color: #B22222;
+        --secondary-color: #8B0000;
+        --background-light: #F8F9FA;
+        --text-dark: #333333;
+        --text-muted: #6C757D;
+        --border-light: #E9ECEF;
+    }
+
+    .profiling-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--background-light);
+        font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    }
+
+    .profiling-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-light);
+    }
+
+    .profiling-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+        color: var(--secondary-color);
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--border-light);
+        padding-bottom: 0.5rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-dark);
+        transition: background-color 0.2s ease;
+    }
+
+    .info-list li:last-child {
+        border-bottom: none;
+    }
+
+    .info-list li:hover {
+        background-color: rgba(178, 34, 34, 0.05);
+    }
+
+    .highlight {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+    .chart-card {
+        position: relative;
+        height: 450px;
+    }
+
+    .ideal-donor-card {
+        display: flex;
+        align-items: center;
+        background-color: rgba(178, 34, 34, 0.05);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .ideal-donor-icon {
+        margin-right: 1rem;
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+        font-style: italic;
+        text-align: center;
+    }
+
+    .profiling-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .profiling-column {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .profiling-column.full-width {
+        flex-basis: 100%;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .card-header i {
+        margin-right: 0.75rem;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .cluster-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .cluster-item {
+        background-color: rgba(178, 34, 34, 0.05);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .cluster-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .cluster-badge {
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    .cluster-details {
+        list-style: none;
+        padding: 0;
+    }
+
+    .cluster-details li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .cluster-details i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .info-list .label {
+        display: flex;
+        align-items: center;
+    }
+
+    .info-list .label i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        .profiling-container {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .profiling-container {
+            padding: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.7rem;
+        }
+
+        .profiling-card {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+{% endblock %}

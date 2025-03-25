@@ -1,0 +1,11 @@
+ 
+.sidebar {
+    height: 100vh;
+    background-color: #f8f9fa;
+}
+.nav-link {
+    color: #333;
+}
+.nav-link:hover {
+    color: #007bff;
+}

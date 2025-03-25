@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="campaign-container">
+    <h1><i class="fas fa-bullhorn"></i> Efficacité des Campagnes</h1>
+
+    <div class="stats">
+        <p><i class="fas fa-hand-holding-heart"></i> Nombre moyen de dons par donneur : <span class="highlight">{{ avg_dons }}</span></p>
+        <p><i class="fas fa-calendar-alt"></i> Mois avec le plus de dons : <span class="highlight">{{ mois_plus_eleve }}</span></p>
+        <p><i class="fas fa-users"></i> Groupe d’âge le plus actif : <span class="highlight">{{ dominant_group }}</span></p>
+    </div>
+
+    <!-- Graphique des dons par mois -->
+    <div class="chart-section">
+        <h3><i class="fas fa-chart-bar"></i> Dons par Mois</h3>
+        <canvas id="monthChart"></canvas>
+    </div>
+
+    <!-- Graphique par genre -->
+    <div class="chart-section">
+        <h3><i class="fas fa-venus-mars"></i> Répartition par Genre</h3>
+        <canvas id="genreChart"></canvas>
+    </div>
+
+    <!-- Graphique par âge -->
+    <div class="chart-section">
+        <h3><i class="fas fa-birthday-cake"></i> Répartition par Âge</h3>
+        <canvas id="ageChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var chartData = {{ chart_data|safe }};
+
+    // Graphique des dons par mois
+    var ctxMonth = document.getElementById('monthChart').getContext('2d');
+    new Chart(ctxMonth, {
+        type: 'bar',
+        data: {
+            labels: chartData.mois.labels,
+            datasets: [{
+                label: 'Nombre de Donneurs',
+                data: chartData.mois.counts,
+                backgroundColor: 'rgba(178, 34, 34, 0.6)',
+                borderColor: 'rgba(178, 34, 34, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } },
+            plugins: { title: { display: true, text: 'Tendances Mensuelles des Dons' } }
+        }
+    });
+
+    // Graphique par genre
+    var ctxGenre = document.getElementById('genreChart').getContext('2d');
+    new Chart(ctxGenre, {
+        type: 'pie',
+        data: {
+            labels: chartData.genre.labels,
+            datasets: [{
+                data: chartData.genre.counts,
+                backgroundColor: ['#36A2EB', '#FF6384'],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { title: { display: true, text: 'Répartition par Genre' } }
+        }
+    });
+
+    // Graphique par âge
+    var ctxAge = document.getElementById('ageChart').getContext('2d');
+    new Chart(ctxAge, {
+        type: 'bar',
+        data: {
+            labels: chartData.age.labels,
+            datasets: [{
+                label: 'Nombre de Donneurs',
+                data: chartData.age.counts,
+                backgroundColor: 'rgba(178, 34, 34, 0.6)',
+                borderColor: 'rgba(178, 34, 34, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } },
+            plugins: { title: { display: true, text: 'Répartition par Tranche d’Âge' } }
+        }
+    });
+</script>
+
+<style>
+    /* Variables CSS harmonisées */
+    :root {
+        --primary-color: #B22222;
+        --secondary-color: #8B0000;
+        --background-light: #F8F9FA;
+        --text-dark: #333333;
+        --text-muted: #6C757D;
+        --border-light: #E9ECEF;
+    }
+
+    /* Conteneur principal */
+    .campaign-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
+        background-color: var(--background-color);
+        font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Titre principal */
+    h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    h1 i {
+        margin-right: 10px;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    }
+
+    /* Statistiques */
+    .stats {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .stats p {
+        font-size: 1.2rem;
+        margin: 10px 0;
+    }
+
+    .stats i {
+        margin-right: 8px;
+        color: var(--primary-color);
+    }
+
+    .highlight {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    /* Section des graphiques */
+    .chart-section {
+        margin-bottom: 40px;
+    }
+
+    .chart-section h3 {
+        font-size: 1.7rem;
+        color: var(--secondary-color);
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--background-color);
+        padding-bottom: 0.5rem;
+    }
+
+    .chart-section i {
+        margin-right: 8px;
+        color: var(--primary-color);
+    }
+
+    canvas {
+        max-height: 400px;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px var(--shadow-color);
+        transition: all 0.3s ease;
+    }
+
+    canvas:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px var(--shadow-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .campaign-container {
+            padding: 30px 15px;
+        }
+        h1 {
+            font-size: 2rem;
+        }
+        .stats p {
+            font-size: 1.1rem;
+        }
+        .chart-section h3 {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .campaign-container {
+            padding: 20px 10px;
+        }
+        h1 {
+            font-size: 1.8rem;
+        }
+        .stats p {
+            font-size: 1rem;
+        }
+        .chart-section h3 {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="health-container">
+    <div class="health-header">
+        <i class="fas fa-heartbeat"></i>
+        <h1>Santé des Donneurs</h1>
+    </div>
+
+    <div class="card health-card">
+        <h3 class="card-title">Conditions de Santé</h3>
+        <table class="health-table">
+            <thead>
+                <tr>
+                    <th>Condition</th>
+                    <th>Nombre</th>
+                    <th>Pourcentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><i class="fas fa-heartbeat"></i> Hypertension</td>
+                    <td class="highlight">{{ health_stats.hypertension.count }}</td>
+                    <td>{{ health_stats.hypertension.percentage|floatformat:1 }}%</td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-syringe"></i> Diabète</td>
+                    <td class="highlight">{{ health_stats.diabete.count }}</td>
+                    <td>{{ health_stats.diabete.percentage|floatformat:1 }}%</td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-lungs"></i> Asthme</td>
+                    <td class="highlight">{{ health_stats.asthme.count }}</td>
+                    <td>{{ health_stats.asthme.percentage|floatformat:1 }}%</td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-virus"></i> HIV/HBS/HCV</td>
+                    <td class="highlight">{{ health_stats.hiv_hbs_hcv.count }}</td>
+                    <td>{{ health_stats.hiv_hbs_hcv.percentage|floatformat:1 }}%</td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-hand-holding-medical"></i> Tatoué</td>
+                    <td class="highlight">{{ health_stats.tatoue.count }}</td>
+                    <td>{{ health_stats.tatoue.percentage|floatformat:1 }}%</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="total-donneurs">Total des donneurs : <span class="highlight">{{ health_stats.total }}</span></p>
+    </div>
+
+    <!-- Graphique des conditions -->
+    <div class="card health-card chart-card">
+        <h3 class="card-title">Conditions de Santé des Donneurs</h3>
+        <canvas id="healthChart" class="chart-canvas"></canvas>
+    </div>
+
+    <!-- Graphique d’éligibilité -->
+    <div class="card health-card chart-card">
+        <h3 class="card-title">Éligibilité au Don de Sang</h3>
+        <canvas id="eligibilityChart" class="chart-canvas"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('healthChart').getContext('2d');
+    var healthChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Hypertension', 'Diabète', 'Asthme', 'HIV/HBS/HCV', 'Tatoué'],
+            datasets: [{
+                label: 'Nombre de Donneurs avec Condition',
+                data: [
+                    {{ health_stats.hypertension.count }},
+                    {{ health_stats.diabete.count }},
+                    {{ health_stats.asthme.count }},
+                    {{ health_stats.hiv_hbs_hcv.count }},
+                    {{ health_stats.tatoue.count }}
+                ],
+                backgroundColor: [
+                    'rgba(178, 34, 34, 0.6)',  // Rouge sang
+                    'rgba(255, 165, 0, 0.6)',  // Orange
+                    'rgba(34, 139, 34, 0.6)',  // Vert forêt
+                    'rgba(75, 0, 130, 0.6)',   // Indigo
+                    'rgba(70, 130, 180, 0.6)'  // Bleu acier
+                ],
+                borderColor: [
+                    'rgba(178, 34, 34, 1)',
+                    'rgba(255, 165, 0, 1)',
+                    'rgba(34, 139, 34, 1)',
+                    'rgba(75, 0, 130, 1)',
+                    'rgba(70, 130, 180, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Nombre', color: '#555' } }
+            },
+            plugins: {
+                title: { display: true, text: 'Conditions de Santé des Donneurs', font: { size: 18 }, color: '#b22222' },
+                legend: { position: 'top', labels: { font: { size: 14 }, color: '#555' } }
+            }
+        }
+    });
+
+    var eligibilityData = {{ eligibility_stats|safe }};
+    var ctxEligibility = document.getElementById('eligibilityChart').getContext('2d');
+    var eligibilityChart = new Chart(ctxEligibility, {
+        type: 'pie',
+        data: {
+            labels: ['Éligibles', 'Non Éligibles'],
+            datasets: [{
+                data: [eligibilityData.eligible, eligibilityData.non_eligible],
+                backgroundColor: ['#28a745', '#dc3545'], // Vert et rouge
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { font: { size: 14 }, color: '#555' } },
+                title: { display: true, text: 'Éligibilité au Don de Sang', font: { size: 18 }, color: '#b22222' }
+            }
+        }
+    });
+</script>
+
+<style>
+    /* Variables CSS harmonisées */
+    :root {
+        --primary-color: #b22222;   /* Rouge sang */
+        --secondary-color: #8b1a1a; /* Rouge foncé */
+        --background-color: #f5f5f5;
+        --card-bg: #fff;
+        --text-muted: #6c757d;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --sidebar-text: #555;
+    }
+
+    /* Conteneur principal */
+    .health-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* En-tête */
+    .health-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: var(--primary-color);
+        animation: fade-in 0.8s ease-out;
+    }
+
+    .health-header h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .health-header i {
+        font-size: 2.5rem;
+        margin-right: 10px;
+        vertical-align: middle;
+        animation: heartbeat 2s infinite;
+    }
+
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Carte */
+    .health-card {
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        box-shadow: 0 5px 15px var(--shadow-color);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        animation: slide-up 0.5s ease-out forwards;
+    }
+
+    .health-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px var(--shadow-color);
+    }
+
+    .card-title {
+        color: var(--secondary-color);
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    /* Tableau */
+    .health-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1rem;
+    }
+
+    .health-table th, .health-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .health-table th {
+        background-color: #f8f8f8;
+        color: var(--sidebar-text);
+        font-weight: bold;
+    }
+
+    .health-table tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .highlight {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .total-donneurs {
+        margin-top: 15px;
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        text-align: right;
+    }
+
+    /* Graphiques */
+    .chart-card {
+        padding: 20px;
+    }
+
+    .chart-canvas {
+        max-height: 400px;
+        width: 100%;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .health-container {
+            padding: 30px 15px;
+        }
+        .health-header h1 {
+            font-size: 2rem;
+        }
+        .health-header i {
+            font-size: 2rem;
+        }
+        .health-card {
+            padding: 15px;
+        }
+        .card-title {
+            font-size: 1.2rem;
+        }
+        .health-table {
+            font-size: 0.9rem;
+        }
+        .health-table th, .health-table td {
+            padding: 8px;
+        }
+        .chart-canvas {
+            max-height: 300px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .health-container {
+            padding: 20px 10px;
+        }
+        .health-header h1 {
+            font-size: 1.8rem;
+        }
+        .health-header i {
+            font-size: 1.8rem;
+        }
+        .health-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .health-table th, .health-table td {
+            min-width: 100px; /* Assure une largeur minimale pour la lisibilité */
+        }
+        .total-donneurs {
+            text-align: center;
+            font-size: 1rem;
+        }
+        .chart-canvas {
+            max-height: 250px;
+        }
+    }
+</style>
+{% endblock %}

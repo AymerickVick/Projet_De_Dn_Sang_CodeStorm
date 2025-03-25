@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Campagne Don de Sang</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background-color: #ffffff;
+            border-right: 1px solid #ddd;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar h4 {
+            color: #b22222;
+            font-weight: bold;
+            padding: 20px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .nav-link {
+            color: #555;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff;
+            background-color: #b22222;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        main {
+            margin-left: 250px;
+            background-color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            transition: margin-left 0.3s ease;
+        }
+
+        .toggle-btn {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1100;
+            background-color: #b22222;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-250px);
+            }
+            main {
+                margin-left: 0;
+                width: 100%;
+            }
+            .toggle-btn {
+                display: block;
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 200px;
+            }
+            .toggle-btn {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-md-block sidebar">
+                <div class="position-sticky pt-3">
+                    <h4><i class="fas fa-tachometer-alt"></i> <span>Tableau de Bord</span></h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="fas fa-home"></i> <span>Accueil</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'geo' %}active{% endif %}" href="{% url 'geo' %}"><i class="fas fa-map"></i> <span>Carte</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'health' %}active{% endif %}" href="{% url 'health' %}"><i class="fas fa-heartbeat"></i> <span>Santé</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'profiling' %}active{% endif %}" href="{% url 'profiling' %}"><i class="fas fa-users"></i> <span>Profilage</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'efficiency' %}active{% endif %}" href="{% url 'efficiency' %}"><i class="fas fa-chart-line"></i> <span>Efficacité</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'loyalty' %}active{% endif %}" href="{% url 'loyalty' %}"><i class="fas fa-redo"></i> <span>Fidélisation</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'sentiment' %}active{% endif %}" href="{% url 'sentiment' %}"><i class="fas fa-comment"></i> <span>Sentiment</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'prediction' %}active{% endif %}" href="{% url 'prediction' %}"><i class="fas fa-robot"></i> <span>Prédiction</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'donors' %}active{% endif %}" href="{% url 'donors' %}"><i class="fas fa-user-md"></i> <span>Donneurs</span></a></li>
+                        {% if user.is_superuser %}
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'add_donor' %}active{% endif %}" href="{% url 'add_donor' %}"><i class="fas fa-user-plus"></i> <span>Ajouter Donneur</span></a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

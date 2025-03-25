@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="dashboard-container">
+    <!-- En-tête -->
+    <div class="dashboard-header">
+        <i class="bi bi-heart-pulse"></i>
+        <h1>Bienvenue sur le Tableau de Bord</h1>
+        <p class="text-muted">Gérez et suivez les dons de sang en temps réel</p>
+    </div>
+
+    <!-- Cartes statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="bi bi-people-fill"></i>
+            <h3>{{ total_donors }}</h3>
+            <p>Total des donneurs</p>
+        </div>
+        <div class="stat-card">
+            <i class="bi bi-clock-history"></i>
+            <h3>{{ avg_age }} ans</h3>
+            <p>Âge moyen des donneurs</p>
+        </div>
+    </div>
+
+    <!-- Instruction et bouton -->
+    <p class="instruction">Utilisez la barre latérale pour naviguer entre les différentes sections.</p>
+    <a href="{% url 'prediction' %}" class="action-btn">Prédire l’éligibilité</a>
+</div>
+
+<style>
+    /* Variables CSS harmonisées avec base.html */
+    :root {
+        --primary-color: #b22222;   /* Rouge sang */
+        --secondary-color: #8b1a1a; /* Rouge plus foncé */
+        --background-color: #f5f5f5;
+        --card-bg: #fff;
+        --text-muted: #6c757d;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --sidebar-text: #555;       /* Couleur par défaut des liens sidebar */
+    }
+
+    /* Conteneur principal */
+    .dashboard-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* En-tête */
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: var(--primary-color);
+        animation: fade-in 0.8s ease-out;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .dashboard-header i {
+        font-size: 3rem;
+        animation: heartbeat 2s infinite;
+    }
+
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cartes statistiques */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px var(--shadow-color);
+        text-align: center;
+        transition: all 0.3s ease;
+        animation: slide-up 0.5s ease-out forwards;
+    }
+
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px var(--shadow-color);
+    }
+
+    .stat-card i {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .stat-card h3 {
+        font-size: 1.5rem;
+        color: var(--secondary-color);
+        margin: 0;
+    }
+
+    .stat-card p {
+        color: var(--text-muted);
+        margin: 5px 0 0;
+    }
+
+    @keyframes slide-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Message d’instruction */
+    .instruction {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        animation: fade-in 1s ease-out 0.3s forwards;
+        opacity: 0;
+    }
+
+    /* Bouton d’action harmonisé avec la sidebar */
+    .action-btn {
+        display: block;
+        width: 200px;
+        margin: 20px auto 0;
+        color: var(--sidebar-text); /* Gris #555 comme la sidebar */
+        background-color: transparent;
+        border: 2px solid var(--primary-color);
+        padding: 12px 20px;
+        border-radius: 25px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        animation: btn-pop 0.5s ease-out 0.4s forwards;
+        opacity: 0;
+    }
+
+    .action-btn:hover {
+        color: #ffffff; /* Blanc comme la sidebar au survol */
+        background-color: var(--primary-color); /* Rouge #b22222 */
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+
+    @keyframes btn-pop {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 30px 15px;
+        }
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+        .dashboard-header i {
+            font-size: 2.5rem;
+        }
+        .stat-card {
+            padding: 15px;
+        }
+        .stat-card h3 {
+            font-size: 1.2rem;
+        }
+        .action-btn {
+            width: 150px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-container {
+            padding: 20px 10px;
+        }
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+        }
+        .dashboard-header i {
+            font-size: 2rem;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr; /* Une colonne sur petits écrans */
+        }
+        .action-btn {
+            width: 130px;
+        }
+    }
+</style>
+{% endblock %}
