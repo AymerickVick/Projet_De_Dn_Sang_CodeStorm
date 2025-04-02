@@ -10,12 +10,13 @@ Application web Django pour gérer une base de données de donneurs de sang. Ell
 - Géolocalisation automatique.
 
 ## Prérequis
-- **Logiciels** : Python 3.9.6+, Django 4.2.16, navigateur web, Git (optionnel).
+- **Framework web** : Django 4.2.16
+- **Logiciels** : Python 3.9.6+, navigateur web, Git (optionnel).
 - **Dépendances** : `django`, `pandas`, `numpy`, `scikit-learn`, `joblib`, `textblob`, `requests`.
 - **Ressources** : Font Awesome (CDN), API Nominatim (géolocalisation).
 
 ## Installation
-1. Cloner : `git clone <URL>` ou décompresser le code.
+1. Cloner : `git clone <URL>` ou alors télécharger et  décompresser le dossier contenant le code source.
 2. Environnement virtuel : `python -m venv venv` puis `venv\Scripts\activate` (Windows).
 3. Dépendances : `pip install -r requirements.txt`.
 4. Configurer `settings.py` (DEBUG=True, SQLite par défaut).
