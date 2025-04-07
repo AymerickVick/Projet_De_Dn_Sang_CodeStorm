@@ -5,3 +5,4 @@ folium
 scikit-learn
 textblob
 requests
+djangorestframework
