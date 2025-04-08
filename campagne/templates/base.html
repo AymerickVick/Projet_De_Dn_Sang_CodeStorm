@@ -137,10 +137,11 @@
             .sidebar {
                 transform: translateX(-100%);
             }
-
-            .sidebar.show {
-                transform: translateX(0);
+              .sidebar.show {
+                transform: translateX(0); /* assure que ça glisse dans la vue */
+                z-index: 1050;
             }
+
 
             main {
                 margin-left: 0;
@@ -154,6 +155,8 @@
     <button class="toggle-btn" onclick="toggleSidebar()" id="toggleSidebar">
         <i class="fas fa-bars"></i>
     </button>
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:1040;" onclick="closeSidebar()"></div>
+
 
     <!-- Sidebar + Main -->
     <div class="container-fluid">
@@ -188,12 +191,17 @@
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggleSidebar');
         const icon = toggleBtn.querySelector('i');
-
+    
         function toggleSidebar() {
+            // Pour desktop
             sidebar.classList.toggle('hide');
+    
+            // Pour mobile
+            sidebar.classList.toggle('show');
+    
+            // Gestion icône toggle
             toggleBtn.classList.toggle('active');
-
-            if (sidebar.classList.contains('hide')) {
+            if (toggleBtn.classList.contains('active')) {
                 icon.classList.remove('fa-bars');
                 icon.classList.add('fa-times');
             } else {
@@ -201,7 +209,34 @@
                 icon.classList.add('fa-bars');
             }
         }
+        function toggleSidebar() {
+        const isMobile = window.innerWidth <= 768;
+
+        sidebar.classList.toggle('hide');
+        sidebar.classList.toggle('show');
+        toggleBtn.classList.toggle('active');
+
+        if (toggleBtn.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+            if (isMobile) document.getElementById('overlay').style.display = 'block';
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+            if (isMobile) document.getElementById('overlay').style.display = 'none';
+        }
+    }
+
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            toggleBtn.classList.remove('active');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+            document.getElementById('overlay').style.display = 'none';
+        }
+
     </script>
+    
 
 </body>
 </html>
