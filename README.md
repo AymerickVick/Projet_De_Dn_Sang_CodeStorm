@@ -1,7 +1,16 @@
 # Projet Don de Sang
 
 ## Aperçu
-Application web Django pour gérer une base de données de donneurs de sang. Elle centralise les informations (âge, genre, profession, localisation, santé, dons), prédit l’éligibilité via un modèle machine learning, et fournit des analyses statistiques. Interface moderne et responsive (palette rouge/grise, icônes Font Awesome).
+  Application web Django pour gérer une base de données de donneurs de sang. Elle centralise les informations (âge, genre, profession, localisation, santé, dons), prédit l’éligibilité via un modèle machine learning, et fournit des analyses statistiques. Interface moderne et responsive (palette rouge/grise, icônes Font Awesome).
+
+
+![image](https://github.com/user-attachments/assets/b0aacf86-86a0-4e5a-bd9c-68f44b09db5e)  
+
+
+![image](https://github.com/user-attachments/assets/e08bb587-69c1-4457-b9d4-cf67a163299e)
+
+
+
 
 ## Objectifs
 - Gérer les données des donneurs.
