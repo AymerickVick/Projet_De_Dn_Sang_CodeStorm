@@ -172,7 +172,7 @@
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'efficiency' %}active{% endif %}" href="{% url 'efficiency' %}"><i class="fas fa-chart-line"></i> <span>Efficacité</span></a></li>
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'loyalty' %}active{% endif %}" href="{% url 'loyalty' %}"><i class="fas fa-redo"></i> <span>Fidélisation</span></a></li>
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'sentiment' %}active{% endif %}" href="{% url 'sentiment' %}"><i class="fas fa-comment"></i> <span>Sentiment</span></a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'prediction' %}active{% endif %}" href="{% url 'prediction' %}"><i class="fas fa-robot"></i> <span>Prédiction</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'prediction' %}active{% endif %}" href="{% url 'prediction' %}"><i class="fas fa-robot"></i> <span>Prédication</span></a></li>
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'donors' %}active{% endif %}" href="{% url 'donors' %}"><i class="fas fa-user-md"></i> <span>Donneurs</span></a></li>
                         {% if user.is_superuser %}
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'add_donor' %}active{% endif %}" href="{% url 'add_donor' %}"><i class="fas fa-user-plus"></i> <span>Ajouter Donneur</span></a></li>
