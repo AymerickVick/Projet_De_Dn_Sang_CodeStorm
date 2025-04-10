@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'  # Remplacez par une cl√© s√
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://codestorm-don-de-sang.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
