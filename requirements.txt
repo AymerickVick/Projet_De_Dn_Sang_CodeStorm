@@ -6,3 +6,4 @@ scikit-learn
 textblob
 requests
 djangorestframework
+gunicorn
