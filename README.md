@@ -41,14 +41,14 @@
   - 🛠️ Git  : Pour le contrôle de version et la gestion du code source.
 - ## Dépendances
 
-- 🧩 **django** : Framework web principal.
-- 🐼 **pandas** : Manipulation et analyse des données.
-- 🔢 **numpy** : Calculs numériques avancés.
-- 🤖 **scikit-learn** : Modèles de machine learning.
-- 🗃️ **joblib** : Sérialisation des modèles ML.
-- 🗣️ **textblob** : Traitement du langage naturel.
-- 🌍 **requests** : Requêtes HTTP pour communiquer avec des APIs externes.
-- 🐿️ **gunicorn** : Serveur WSGI pour déployer des applications Python.
+  - 🧩 **django** : Framework web principal.
+  - 🐼 **pandas** : Manipulation et analyse des données.
+  - 🔢 **numpy** : Calculs numériques avancés.
+  - 🤖 **scikit-learn** : Modèles de machine learning.
+  - 🗃️ **joblib** : Sérialisation des modèles ML.
+  - 🗣️ **textblob** : Traitement du langage naturel.
+  - 🌍 **requests** : Requêtes HTTP pour communiquer avec des APIs externes.
+  - 🐿️ **gunicorn** : Serveur WSGI pour déployer des applications Python.
 
 - **Ressources** :
   - 🖼️ Font Awesome (CDN) : Bibliothèque d'icônes pour améliorer l'interface utilisateur.
